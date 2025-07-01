@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: music
+  cloud:
+    zookeeper:
+      connect-string: ${server:master}:2181
+      discovery:
+        register: true
+        enabled: true
+        root: /services
+        instance-id: ${spring.application.name}:${server.port}

@@ -1,0 +1,35 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: gate
+  cloud:
+    zookeeper:
+      connect-string: ${server:master}:2181
+      discovery:
+        enabled: true
+        root: /services
+        instance-id: ${spring.application.name}:${server.port}
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: user-route
+              uri: lb://user
+              predicates:
+                - Path=/user/**
+            - id: music-route
+              uri: lb://music
+              predicates:
+                - Path=/music/**
+            - id: agent-route
+              uri: lb://agent
+              predicates:
+                - Path=/agent/**
+configure:
+  path:
+    exclude:
+      - /user/login
+      - /user/register
+
+

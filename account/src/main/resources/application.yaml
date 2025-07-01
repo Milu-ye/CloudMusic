@@ -1,0 +1,47 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: user
+  datasource:
+    url: jdbc:mysql://localhost:3306/account?useUnicode=true&characterEncoding=utf-8&useCompression=true&rewriteBatchedStatements=true
+    username: root
+    password: 781045306aA
+  cloud:
+    zookeeper:
+      connect-string: ${server:192.168.183.128}:2181
+      discovery:
+        register: true
+        enabled: true
+        root: /services
+        instance-id: ${spring.application.name}:${server.port}
+mybatis-plus:
+  mapper-locations: classpath:/mapper/**.xml
+  configuration:
+    default-enum-type-handler: com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler
+  global-config:
+    db-config:
+      id-type: assign_id
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'verify'
+      paths-to-match: '/account/verify/**'
+      packages-to-scan: com.eren.cloudmusic.account.controller
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+dubbo:
+  registry:
+    address: zookeeper://192.168.183.128:2181
+    register-mode: instance # 新用户请设置此值，表示启用应用级服务发现
+logging:
+  level:
+    org.springframework: warn
+
