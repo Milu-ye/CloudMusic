@@ -1,6 +1,8 @@
 package com.eren.cloudmusic.filter;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.io.FastByteArrayOutputStream;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.text.AntPathMatcher;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.json.JSONUtil;
@@ -10,7 +12,7 @@ import com.eren.cloudmusic.exceptions.VerifyCode;
 import com.eren.cloudmusic.properties.PathProperties;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
+import org.apache.zookeeper.common.IOUtils;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -21,9 +23,9 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
-
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
@@ -42,13 +44,17 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
     private PathProperties pathProperties;
 
     public AuthGlobalFilter() throws IOException {
-        BufferedInputStream reader = IOUtils.buffer(AuthGlobalFilter.class.getClassLoader().getResourceAsStream("private_key.txt"));
-        byte[] buffer = new byte[0];
-        key = new byte[intervalLength];
-        while (reader.read(buffer, 0, buffer.length)!=-1){
-            key = (byte[]) ArrayUtil.append(key, buffer);
+
+        try(InputStream reader = AuthGlobalFilter.class.getClassLoader().getResourceAsStream("private_key.txt")){
+            if (reader == null){
+                throw new IOException("private_key.txt not found");
+            }
+            key = IoUtil.readBytes(reader);
+        }catch (IOException e){
+            log.error("private_key.txt not found");
         }
-        reader.close();
+
+
     }
 
     public boolean isExclude(String path) {

@@ -35,6 +35,7 @@
         <curator.version>5.7.1</curator.version>
         <knife4j.version>4.4.0</knife4j.version>
         <dubbo.version>3.3.0</dubbo.version>
+        <minio.version>8.5.17</minio.version>
     </properties>
     <dependencies>
         <dependency>
@@ -67,6 +68,11 @@
                 <groupId>org.apache.dubbo</groupId>
                 <artifactId>dubbo-spring-boot-starter</artifactId>
                 <version>${dubbo.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.minio</groupId>
+                <artifactId>minio</artifactId>
+                <version>${minio.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.dubbo</groupId>

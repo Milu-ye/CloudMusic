@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 public class Account {
 
     @TableId
-    private Long id;
+    private Long accountId;
 
     private String nickname;
 
@@ -25,5 +25,15 @@ public class Account {
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
+
+    public Account(String nickname, String phone, String password){
+        this.nickname = nickname;
+        this.phone = phone;
+        this.password = password;
+    }
+
+    public Account(Long accountId){
+        this.accountId = accountId;
+    }
 
 }

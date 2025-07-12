@@ -7,9 +7,9 @@
         <artifactId>parent</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <artifactId>gateway</artifactId>
-    <name>gateway</name>
-    <description>gateway</description>
+    <artifactId>gate</artifactId>
+    <name>gate</name>
+    <description>gate</description>
     <url/>
     <licenses>
         <license/>

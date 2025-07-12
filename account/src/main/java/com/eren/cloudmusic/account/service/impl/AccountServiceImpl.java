@@ -1,6 +1,9 @@
 package com.eren.cloudmusic.account.service.impl;
 
+import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.crypto.digest.DigestUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.jwt.JWTUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -18,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -27,22 +31,18 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     @Resource
     private AccountMapper accountMapper;
 
-    private byte[] secretKey;
+    private byte[] key;
 
     @PostConstruct
     public void init() throws IOException {
-        BufferedInputStream reader = IOUtils.buffer(AccountServiceImpl.class.getClassLoader().getResourceAsStream("private_key.txt"));
-        int len ;
-        byte[] buffer = new byte[1024];
-        while ((len = reader.read(buffer, 0, buffer.length)) != -1){
-            if (ArrayUtil.isEmpty(secretKey)){
-                secretKey = Arrays.copyOfRange(buffer, 0, len);
+        try(InputStream reader = AccountServiceImpl.class.getClassLoader().getResourceAsStream("private_key.txt")){
+            if (reader == null){
+                throw new IOException("private_key.txt not found");
             }
-            else {
-                secretKey = (byte[]) ArrayUtil.append(secretKey, Arrays.copyOfRange(buffer, 0, len));
-            }
+            key = IoUtil.readBytes(reader);
+        }catch (IOException e){
+            log.error("private_key.txt not found");
         }
-
 
     }
 
@@ -51,16 +51,24 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
 
         // 使用 lambda 查询构造器查询用户
         Account account = this.getOne(new QueryWrapper<Account>().lambda()
-                .select(Account::getId)
+                .select(Account::getAccountId)
                 .eq(Account::getPhone, phone)
-                .eq(Account::getPassword, password));
+                .eq(Account::getPassword, DigestUtil.md5Hex16( password)));
 
         if (account == null) {
             throw new ServerException(AccountCode.PHONE_OR_PASSWORD_ERROR);
         }
 
-        return JWTUtil.createToken(Map.of("accountId", account.getId()),secretKey);
+        return JWTUtil.createToken(Map.of("accountId", account.getAccountId()),key);
 
+    }
+
+    @Override
+    public boolean register(String phone, String password, String nickname) {
+        if (!phone.matches("^1[3-9]\\d{9}$")){
+            throw new ServerException(AccountCode.PHONE_FORMAT_ERROR);
+        }
+        return this.save(new Account(nickname,phone, DigestUtil.md5Hex16( password)));
     }
 
 }

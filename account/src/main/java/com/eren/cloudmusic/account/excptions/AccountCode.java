@@ -4,7 +4,8 @@ import com.eren.cloudmusic.common.exceptions.ErrorCode;
 
 public enum AccountCode implements ErrorCode {
 
-    PHONE_OR_PASSWORD_ERROR(1004, "PHONE_OR_PASSWORD_ERROR");
+    PHONE_OR_PASSWORD_ERROR(1004, "PHONE_OR_PASSWORD_ERROR"),
+    PHONE_FORMAT_ERROR(1005, "PHONE_FORMAT_ERROR");
 
 
 
